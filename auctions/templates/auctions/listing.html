@@ -1,0 +1,61 @@
+{% extends 'auctions/layout.html' %}
+
+{% block title %}
+    {{ listing.title }}
+{% endblock title %}
+
+{% block body %}
+    <article>
+        <h1>{{ listing.title }}</h1>
+        {% if message %}
+            {{ message }}
+        {% endif %}
+        {% if isAuthor %}
+            <form action="{% url 'close' %}" method="POST">
+                {% csrf_token %}
+                <button type="submit" name='pk' value='{{ listing.pk }}'>Close listing</button>
+            </form>
+        {% endif %}
+        <aside>
+            <figure>
+                <img src="{{ listing.imageURL }}" alt="">
+            </figure>
+        </aside>
+        <section>
+            <p>{{ listing.description }}</p>
+            <p>$ {{ listing.basePrice }}</p>
+            <form action="{% url 'listing' listing.pk %}" method="POST">
+                {% csrf_token %}
+                {{ form }}
+                <button type="submit">Bid</button>
+            </form>
+            <p>Category: {{ listing.category }}</p>
+            <form action="{% url 'watchList' %}" method="POST">
+                {% csrf_token %}
+                <input type="text" name="pk" value="{{ listing.pk }}" hidden>
+                <input type="text" name="action" value="{{ action }}" hidden>
+                {% if action == 'add' %}
+                    <button type="submit">{{ action }} to watchlist</button>
+                {% else %}
+                    <button type="submit">{{ action }} from watchlist</button>
+                {% endif %}
+            </form>
+        </section>
+    </article>
+    <section>
+        <h2>Comments</h2>
+        
+        <form action="{% url 'comments' %}" method="POST">
+            {% csrf_token %}
+            {{ commentForm }}
+            <button type="submit">Comment</button>
+        </form>
+
+        {% for comment in listing.comments.all %}
+            <div>
+                <p>By {{ comment.user.username }}</p>
+                <p>{{ comment.content }}</p>
+            </div>
+        {% endfor %}
+    </section>
+{% endblock body %}
